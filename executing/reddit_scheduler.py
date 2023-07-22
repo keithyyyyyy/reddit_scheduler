@@ -20,6 +20,6 @@ def handler(event, context):
             return "not sent, reddit error"
     except (NoAccessTokenException, FailToSendRedditException) as error:
             dbLogAndCleanUp(doc["_id"], "failed")
-            return "not sent, error: " + error
+            return doc["_id"] + " failed " + str(error)
 
-print(handler("",""))
+# print(handler({"doc": {"_id": "64bb6d9c375a1989bed55a0c", "type": "image", "title": "test", "refreshToken": "66371868-uUzLql17BztWiDaGB51g3uyg3j1jlw", "body": ["2546d527-5e4e-4888-8206-a9bf1c4555d8-cat.jpg"], "sr": "sandboxtest", "status": "pending", "userId": "13ikv0"}},""))

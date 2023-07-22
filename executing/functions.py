@@ -30,7 +30,7 @@ def getNewAccessToken(refreshToken):
 
 def downloadFromS3(media):
     s3.download_file(
-        "reddit-integrator-frontend-site-bucketd7feb781-1lhafczifgpz5",
+        "reddit-integrator-frontend-site-bucketd7feb781-1jm0vvmt28ka1",
         media,
         'tmp/'+ media
     )
@@ -46,10 +46,21 @@ def authReddit(refreshToken):
 
 def prawsendImages(media_arr, reddit, doc):
     subreddit = reddit.subreddit(doc["sr"])
-    submission = subreddit.submit_gallery(
-        title=doc["title"],
-        images=media_arr
-    )
+    try:
+        if (len(media_arr) == 1):
+            submission = subreddit.submit_image(
+            title=doc["title"],
+            image_path=str(media_arr[0]["image_path"]),
+            without_websockets = True
+        )
+        else:
+            submission = subreddit.submit_gallery(
+                title=doc["title"],
+                images=media_arr
+            )
+        return "image(s) successfully sent"
+    except:
+        return "an error occured sending image(s)"
 
 def prawSendVideo(video_filepath, reddit, doc):
     subreddit = reddit.subreddit(doc["sr"])
@@ -86,12 +97,14 @@ def sendPost(refreshToken, doc):
         return True
     
     except (InvalidPostDetailsException, FailToSendRedditException) as error:
-        raise FailToSendRedditException(error)  
+        raise FailToSendRedditException(error)
+        return False
 
 def dbLogAndCleanUp(docID, newStatus):
     result = threadsCollection.find_one_and_update(
-        {'_id': docID}, 
+        {'_id': ObjectId(docID)}, 
         { '$set': { 'status': newStatus } }
     )
+    print(result)
     
     return "process completed for", str(docID)

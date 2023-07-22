@@ -7,6 +7,7 @@ import boto3
 import json
 
 def handler(event, context):
+
     # mongodb atlas connection
     uri = "mongodb+srv://" + os.getenv("MONGO_USERNAME") + ":" + os.getenv("MONGDO_PASSWORD") + "@reddit.hsttylb.mongodb.net/?retryWrites=true"
     client = MongoClient(uri, tlsCAFile=certifi.where())
@@ -29,6 +30,7 @@ def handler(event, context):
             refresh_token = u["refresh_token"]
         
         output = {}
+        output["_id"] = str(doc["_id"])
         output["type"] = doc["type"]
         output["title"] = doc["title"]
         output["refreshToken"] = refresh_token
@@ -37,12 +39,14 @@ def handler(event, context):
         output["status"] = doc["status"]
         output["userId"] = doc["userId"]
         
-        print(output)
-        print( "\n\n")
-        # response = aws_lambda.invoke(
-        #     FunctionName='reddit_scheduler',
-        #     InvocationType='Event',
-        #     Payload=output
-        # )
+        output_str = json.dumps(output)
+        print(output_str)
+        
+        response = aws_lambda.invoke(
+            FunctionName='reddit_scheduler',
+            InvocationType='Event',
+            Payload=output
+        )
+        return response
 
-print(handler("",""))
+# print(handler("",""))
